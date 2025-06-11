@@ -30,7 +30,7 @@ preprocessor = ColumnTransformer([
 ])
 model = Pipeline([
     ('preprocessor', preprocessor),
-    ('classifier', RandomForestClassifier(n_estimators=100, random_state=42, probability=True))
+    ('classifier', RandomForestClassifier(n_estimators=100, random_state=42, ))
 ])
 
 # Fit the model
@@ -55,7 +55,9 @@ input_df = pd.DataFrame([{
 }])
 
 if st.button("Predict Gall Former"):
-    pred_proba = model.predict_proba(input_df)[0]
+    pred_proba = model.named_steps['classifier'].predict_proba(
+        model.named_steps['preprocessor'].transform(input_df)
+    )[0]
     class_labels = model.named_steps['classifier'].classes_
     top3_idx = np.argsort(pred_proba)[::-1][:3]
     top3_species = [(class_labels[i], round(pred_proba[i]*100, 2)) for i in top3_idx]
